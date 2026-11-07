@@ -44,6 +44,12 @@ class HttpServer(Driver):
             kwargs={"root": self.root_dir},
             remove_created_on_close=self.remove_created_on_close
         )
+        # Expose the storage child as an attribute too, so callers can use
+        # `http.storage.copy_exporter_file(...)` (the flashers driver's
+        # setup_fls_binary relies on this). The Tftp driver already does this;
+        # the HttpServer only registered the child in self.children, which is why
+        # self.http.storage raised "'HttpServer' object has no attribute 'storage'".
+        self.storage = self.children["storage"]
         self.app.router.add_routes(
             [
                 web.static("/", self.root_dir),
